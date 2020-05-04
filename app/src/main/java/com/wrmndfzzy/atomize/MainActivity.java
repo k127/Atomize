@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Switch deleteSwitch;
 
-    private Button atomButton;
+    private FloatingActionButton atomButton;
 
     File input;
     File output;
@@ -102,17 +103,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         imgPath = (TextView) findViewById(R.id.imgPath);
-        final Button select = (Button) findViewById(R.id.select);
         preView = (ImageView) findViewById(R.id.imgPreview);
 
 
         deleteSwitch = (Switch) findViewById(R.id.deleteSwitch);
 
-        atomButton = (Button) findViewById(R.id.atomize);
+        atomButton = (FloatingActionButton) findViewById(R.id.atomize);
 
         quantProgress = (ProgressBar) findViewById(R.id.progBar);
 
-        select.setOnClickListener(new View.OnClickListener() {
+        preView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -251,20 +251,26 @@ public class MainActivity extends AppCompatActivity {
             protected void onPreExecute(){
                 Snackbar.make(findViewById(android.R.id.content), "Atomizing...", Snackbar.LENGTH_SHORT).show();
                 quantProgress.setVisibility(View.VISIBLE);
+                preView.setEnabled(false);
+                deleteSwitch.setEnabled(false);
                 atomButton.setEnabled(false);
+                deleteSwitch.setAlpha(0.4f);
                 atomButton.setAlpha(0.4f);
             }
             @Override
             protected void onPostExecute(Void v){
                 Log.d("quantize", "quantize done");
-                String noImgText = "No image selected.";
+                String noImgText = "Atomize successful! Tap the atom to select another image.";
                 Snackbar.make(findViewById(android.R.id.content), "Done! Saved in /sdcard/Atomize.", Snackbar.LENGTH_SHORT).show();
                 quantProgress.setVisibility(View.INVISIBLE);
                 preView.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.atom_watermark));
                 imgPath.setText(noImgText);
                 selectedImagePath = "";
                 imgSelected = false;
+                preView.setEnabled(true);
+                deleteSwitch.setEnabled(true);
                 atomButton.setEnabled(true);
+                deleteSwitch.setAlpha(1.0f);
                 atomButton.setAlpha(1.0f);
             }
         }.execute();
