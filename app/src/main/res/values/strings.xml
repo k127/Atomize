@@ -31,5 +31,8 @@
     <string name="aboutactivity_label">About</string>
     <string name="licenseactivity_label">Licenses</string>
     <string name="euLic_label">EU License</string>
+    <string name="atomize_successful">Atomize successful!</string>
+    <string name="tap_to_select_another_image">Tap the atom to select another image.</string>
+    <string name="fmt_imgfilesize_before_after">%s 👉 %s</string>
 
 </resources>

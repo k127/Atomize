@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
     Button fnDialogConfirm;
 
     public static Activity mA;
+
+    private String sizeBefore, sizeAfter;
 
     public static Activity getInstance(){
         return mA;
@@ -205,8 +208,9 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
                             Log.d("imgSelected", String.valueOf(bitmap));
+                            sizeBefore = getPrettyImageFileSize(selectedImageUri);
                             preView.setImageBitmap(bitmap);
-                            imgPath.setText(selectedImageLocation);
+                            imgPath.setText(String.format("%s\n%s", selectedImageLocation, sizeBefore));
                             atomButton.setImageDrawable(getDrawable(R.drawable.check));
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -218,6 +222,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private String getPrettyImageFileSize(Uri uri) {
+        String prettyImgFileSize = "";
+        AssetFileDescriptor afd = null;
+        try {
+            afd = getContentResolver().openAssetFileDescriptor(uri, "r");
+            if (afd != null) {
+                prettyImgFileSize = android.text.format.Formatter.formatShortFileSize(this, afd.getLength());
+                Log.v("getPrettyImageFileSize", prettyImgFileSize);
+                afd.close();
+            }
+        } catch (IOException e) {
+            Log.e("getPrettyImageFileSize", e.getMessage());
+        }
+        return prettyImgFileSize;
     }
 
     // listen for atomize once picture is chosen
@@ -270,7 +290,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Void v){
                 Log.d("quantize", "quantize done");
-                String noImgText = "Atomize successful! Tap the atom to select another image.";
+                sizeAfter = getPrettyImageFileSize(Uri.fromFile(output));
+                String noImgText = String.format("%s\n%s\n%s",
+                        getString(R.string.atomize_successful),
+                        String.format(getString(R.string.fmt_imgfilesize_before_after), sizeBefore, sizeAfter),
+                        getString(R.string.tap_to_select_another_image));
                 Snackbar.make(findViewById(android.R.id.content), "Done! Saved in /sdcard/Atomize.", Snackbar.LENGTH_SHORT).show();
                 quantProgress.setVisibility(View.INVISIBLE);
                 preView.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.atom_watermark));
