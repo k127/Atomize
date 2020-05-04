@@ -39,6 +39,7 @@ import android.support.design.widget.Snackbar;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import com.wrmndfzzy.pngquant.LibPngQuant;
 
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView imgPath;
     private ImageView preView;
     private static final int SELECT_PICTURE = 1;
+    private static final int RECEIVE_PICTURE = 2;
     private static String selectedImagePath;
     private static String gone = "image does not exist";
     private boolean imgSelected = false;
@@ -135,6 +137,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
             }
         });
+
+        Intent receivedIntent = getIntent();
+        String receivedAction = receivedIntent.getAction();
+        if (Objects.equals(receivedAction, Intent.ACTION_SEND) && receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM) != null)
+            this.onActivityResult(RECEIVE_PICTURE, RESULT_OK, receivedIntent);
     }
 
     @Override
@@ -186,8 +193,10 @@ public class MainActivity extends AppCompatActivity {
         String invFile = "Invalid file type.";
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == SELECT_PICTURE) {
-                Uri selectedImageUri = data.getData();
+            if (requestCode == SELECT_PICTURE || requestCode == RECEIVE_PICTURE) {
+                Uri selectedImageUri = requestCode == SELECT_PICTURE
+                        ? data.getData()
+                        : (Uri) data.getParcelableExtra(Intent.EXTRA_STREAM);
                 selectedImagePath = getPath(this, selectedImageUri);
                 if (selectedImagePath != null) {
                     String imageType = handleImageType(selectedImagePath);
