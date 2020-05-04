@@ -207,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("imgSelected", String.valueOf(bitmap));
                             preView.setImageBitmap(bitmap);
                             imgPath.setText(selectedImageLocation);
+                            atomButton.setImageDrawable(getDrawable(R.drawable.check));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -233,10 +234,19 @@ public class MainActivity extends AppCompatActivity {
             }
             input = new File(selectedImagePath);
             fileNameDialog();
-        }
-        else{
+        } else if (output != null) {
+            this.shareAtomizedImage(output);
+        } else {
             Snackbar.make(findViewById(android.R.id.content), "Please select an image.", Snackbar.LENGTH_SHORT).show();
         }
+    }
+
+    private void shareAtomizedImage(File file) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/png");
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        startActivity(Intent.createChooser(intent, "Share atomized image"));
     }
 
     public void execQuantTask(){
@@ -272,6 +282,9 @@ public class MainActivity extends AppCompatActivity {
                 atomButton.setEnabled(true);
                 deleteSwitch.setAlpha(1.0f);
                 atomButton.setAlpha(1.0f);
+
+                // replace btn icon
+                atomButton.setImageDrawable(getDrawable(R.drawable.share));
             }
         }.execute();
     }
